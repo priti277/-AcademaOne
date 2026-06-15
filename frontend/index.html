@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcademaOne</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+</head>
+<body>
+  <div id="auth-section">
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-header">
+          <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+          <p>Enter your credentials to access the system</p>
+        </div>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" class="form-control" placeholder="Enter your username" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="btn btn-block">Login</button>
+          <p id="login-error" class="error"></p>
+          <p class="text-center mt-3">
+            Don't have an account? <a href="#" id="show-register">Register</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="register-section" style="display:none;">
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-header">
+          <h2><i class="fas fa-user-plus"></i> Register</h2>
+          <p>Create a new account</p>
+        </div>
+        <form id="signup-form">
+          <div class="form-group">
+            <label for="signup-name">Full Name</label>
+            <input type="text" id="signup-name" class="form-control" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label for="signup-username">Username</label>
+            <input type="text" id="signup-username" class="form-control" placeholder="Choose a username" required>
+          </div>
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required>
+          </div>
+          <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+            <p id="email-error" class="error"></p>
+          </div>
+          <div class="form-group">
+            <label for="signup-role">Role</label>
+            <select id="signup-role" class="form-control">
+              <option value="student">Student</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="signup-class">Class (if student)</label>
+            <select id="signup-class" class="form-control">
+              <option value="">Select Class</option>
+              <option value="10A">10A</option>
+              <option value="10B">10B</option>
+              <option value="11A">11A</option>
+              <option value="11B">11B</option>
+              <option value="12A">12A</option>
+              <option value="12B">12B</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-block">Register</button>
+          <p id="signup-error" class="error"></p>
+          <p class="text-center mt-3">
+            Already have an account? <a href="#" id="show-login">Login</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <div class="container">
+      <div class="sidebar">
+        <div class="logo">
+          <i class="fas fa-calendar-check"></i>
+          <h1>AcademaOne</h1>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+          <li><a href="#" data-section="students"><i class="fas fa-user-graduate"></i> Students</a></li>
+          <li><a href="#" data-section="attendance"><i class="fas fa-clipboard-list"></i> Attendance</a></li>
+          <li><a href="#" data-section="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+          <li><a href="#" data-section="analytics"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+          <li><a href="#" data-section="settings"><i class="fas fa-cog"></i> Settings</a></li>
+          <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+      </div>
+
+      <div class="main-content">
+        <div class="header">
+          <h2><i class="fas fa-home"></i> Dashboard</h2>
+          <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="current-user">Not logged in</span>
+          </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" class="section-content">
+          <div class="stats">
+            <div class="stat-card">
+              <i class="fas fa-user-graduate"></i>
+              <h3 id="total-students">0</h3>
+              <p>Total Students</p>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-calendar-check"></i>
+              <h3 id="today-attendance">0</h3>
+              <p>Today's Attendance</p>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-chart-line"></i>
+              <h3 id="attendance-rate">0%</h3>
+              <p>Overall Attendance Rate</p>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-clock"></i>
+              <h3 id="late-percentage">0%</h3>
+              <p>Late Percentage</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-chart-pie"></i> Attendance Overview</h2>
+            </div>
+            <div class="chart-container">
+              <canvas id="attendanceChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-history"></i> Recent Attendance</h2>
+              <button class="btn btn-sm" id="add-attendance-btn"><i class="fas fa-plus"></i> Add Record</button>
+            </div>
+            <div class="table-responsive">
+              <table id="recent-attendance">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-users"></i> Student Management</h2>
+              <button class="btn btn-sm" id="add-student-btn"><i class="fas fa-plus"></i> Add Student</button>
+            </div>
+            <div class="table-responsive">
+              <table id="students-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Attendance Rate</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Students Content -->
+        <div id="students-content" class="section-content" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-user-graduate"></i> Student Management</h2>
+              <button class="btn btn-sm" id="add-student-btn-2"><i class="fas fa-plus"></i> Add Student</button>
+            </div>
+            
+            <div class="search-box">
+              <input type="text" id="student-search" class="search-input" placeholder="Search students by name...">
+              <select id="student-class-filter" class="filter-select">
+                <option value="">All Classes</option>
+                <option value="10A">10A</option>
+                <option value="10B">10B</option>
+                <option value="11A">11A</option>
+                <option value="11B">11B</option>
+                <option value="12A">12A</option>
+                <option value="12B">12B</option>
+              </select>
+            </div>
+            
+            <div class="table-responsive">
+              <table id="students-full-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Class</th>
+                    <th>Contact</th>
+                    <th>Attendance Rate</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance Content -->
+        <div id="attendance-content" class="section-content" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-clipboard-list"></i> Attendance Management</h2>
+              <div>
+                <button class="btn btn-sm" id="mark-attendance-btn"><i class="fas fa-calendar-plus"></i> Mark Attendance</button>
+                <button class="btn btn-sm btn-success" id="upload-attendance-btn"><i class="fas fa-upload"></i> Upload CSV</button>
+              </div>
+            </div>
+            
+            <div class="search-box">
+              <input type="text" id="attendance-search" class="search-input" placeholder="Search attendance...">
+              <input type="date" id="attendance-date-filter" class="filter-select">
+              <select id="attendance-class-filter" class="filter-select">
+                <option value="">All Classes</option>
+                <option value="10A">10A</option>
+                <option value="10B">10B</option>
+                <option value="11A">11A</option>
+                <option value="11B">11B</option>
+                <option value="12A">12A</option>
+                <option value="12B">12B</option>
+              </select>
+            </div>
+            
+            <div class="table-responsive">
+              <table id="attendance-full-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-calendar"></i> Attendance Calendar</h2>
+            </div>
+            <div id="calendar-view">
+              <!-- Calendar will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports Content -->
+        <div id="reports-content" class="section-content" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-chart-bar"></i> Reports</h2>
+              <div>
+                <button class="btn btn-sm btn-success" id="download-pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button class="btn btn-sm btn-success" id="download-excel-btn"><i class="fas fa-file-excel"></i> Excel</button>
+              </div>
+            </div>
+            
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="monthly-report">Monthly Report</button>
+              <button class="tab-btn" data-tab="student-report">Student Report</button>
+              <button class="tab-btn" data-tab="class-report">Class Report</button>
+            </div>
+            
+            <div class="tab-content active" id="monthly-report">
+              <div class="form-group">
+                <label for="report-month">Select Month</label>
+                <input type="month" id="report-month" class="form-control" value="2023-06">
+              </div>
+              
+              <div class="table-responsive">
+                <table id="monthly-report-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Class</th>
+                      <th>Present</th>
+                      <th>Absent</th>
+                      <th>Late</th>
+                      <th>Attendance %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Will be populated by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="tab-content" id="student-report">
+              <div class="form-group">
+                <label for="report-student">Select Student</label>
+                <select id="report-student" class="form-control">
+                  <option value="">Select a student</option>
+                  <!-- Will be populated by JavaScript -->
+                </select>
+              </div>
+              
+              <div class="table-responsive">
+                <table id="student-report-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Class</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Will be populated by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="tab-content" id="class-report">
+              <div class="form-group">
+                <label for="report-class">Select Class</label>
+                <select id="report-class" class="form-control">
+                  <option value="">Select a class</option>
+                  <option value="10A">10A</option>
+                  <option value="10B">10B</option>
+                  <option value="11A">11A</option>
+                  <option value="11B">11B</option>
+                  <option value="12A">12A</option>
+                  <option value="12B">12B</option>
+                </select>
+              </div>
+              
+              <div class="table-responsive">
+                <table id="class-report-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Present</th>
+                      <th>Absent</th>
+                      <th>Late</th>
+                      <th>Attendance %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Will be populated by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Content -->
+        <div id="analytics-content" class="section-content" style="display:none;">
+          <div class="stats">
+            <div class="stat-card" style="background:linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)">
+              <i class="fas fa-trophy"></i>
+              <h3 id="top-student">-</h3>
+              <p>Top Student</p>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg, #f44336 0%, #c62828 100%)">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3 id="low-attendance-count">0</h3>
+              <p>Low Attendance Alerts</p>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg, #ff9800 0%, #ef6c00 100%)">
+              <i class="fas fa-balance-scale"></i>
+              <h3 id="best-class">-</h3>
+              <p>Best Performing Class</p>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-chart-line"></i> Monthly Attendance Trend</h2>
+            </div>
+            <div class="chart-container">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-chart-bar"></i> Class Comparison</h2>
+            </div>
+            <div class="chart-container">
+              <canvas id="comparisonChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-users"></i> Top 5 Students</h2>
+            </div>
+            <div class="table-responsive">
+              <table id="top-students-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Attendance %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-exclamation-circle"></i> Low Attendance Alerts</h2>
+            </div>
+            <div class="table-responsive">
+              <table id="low-attendance-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Attendance %</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div id="settings-content" class="section-content" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-user-cog"></i> Profile Settings</h2>
+            </div>
+            
+            <form id="profile-form">
+              <div class="form-group">
+                <label for="profile-name">Full Name</label>
+                <input type="text" id="profile-name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="profile-username">Username</label>
+                <input type="text" id="profile-username" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="profile-email">Email</label>
+                <input type="email" id="profile-email" class="form-control">
+                <p id="profile-email-error" class="error"></p>
+              </div>
+              <button type="submit" class="btn">Update Profile</button>
+              <p id="profile-message" class="success" style="display:none;"></p>
+            </form>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-lock"></i> Change Password</h2>
+            </div>
+            
+            <form id="password-form">
+              <div class="form-group">
+                <label for="current-password">Current Password</label>
+                <input type="password" id="current-password" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input type="password" id="confirm-password" class="form-control" required>
+              </div>
+              <button type="submit" class="btn">Change Password</button>
+              <p id="password-message" class="error" style="display:none;"></p>
+            </form>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-cogs"></i> System Settings</h2>
+            </div>
+            
+            <div class="form-group">
+              <label for="theme-select">Theme</label>
+              <select id="theme-select" class="form-control">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="auto">Auto (System)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="notification-toggle">Enable Notifications</label>
+              <input type="checkbox" id="notification-toggle" checked>
+            </div>
+            
+            <div class="form-group">
+              <label for="low-attendance-threshold">Low Attendance Threshold (%)</label>
+              <input type="number" id="low-attendance-threshold" class="form-control" min="0" max="100" value="75">
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <button class="btn btn-success" id="backup-btn"><i class="fas fa-download"></i> Backup Data</button>
+              <button class="btn btn-warning" id="restore-btn"><i class="fas fa-upload"></i> Restore Data</button>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          <p>Attendance Management System &copy; 2023. All rights reserved.</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification" class="notification">
+    <i class="fas fa-check-circle"></i>
+    <span id="notification-text">Operation completed successfully</span>
+  </div>
+
+  <!-- Modal for adding/editing students -->
+  <div id="student-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div class="auth-box">
+      <div class="auth-header">
+        <h2 id="student-modal-title"><i class="fas fa-user-plus"></i> Add Student</h2>
+      </div>
+      <form id="student-form">
+        <input type="hidden" id="student-id">
+        <div class="form-group">
+          <label for="student-name">Full Name</label>
+          <input type="text" id="student-name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="student-username">Username</label>
+          <input type="text" id="student-username" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="student-class">Class</label>
+          <select id="student-class" class="form-control" required>
+            <option value="">Select Class</option>
+            <option value="10A">10A</option>
+            <option value="10B">10B</option>
+            <option value="11A">11A</option>
+            <option value="11B">11B</option>
+            <option value="12A">12A</option>
+            <option value="12B">12B</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="student-contact">Contact Info</label>
+          <input type="text" id="student-contact" class="form-control" placeholder="Enter phone number">
+          <p id="student-contact-error" class="error"></p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn" style="flex:1;">Save</button>
+          <button type="button" id="cancel-student-btn" class="btn btn-danger" style="flex:1;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for marking attendance -->
+  <div id="attendance-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div class="auth-box" style="max-width:600px; max-height:80vh; overflow-y:auto;">
+      <div class="auth-header">
+        <h2 id="attendance-modal-title"><i class="fas fa-calendar-plus"></i> Mark Attendance</h2>
+      </div>
+      <form id="attendance-form">
+        <div class="form-group">
+          <label for="attendance-date">Date</label>
+          <input type="date" id="attendance-date" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="attendance-class">Class</label>
+          <select id="attendance-class" class="form-control" required>
+            <option value="">Select Class</option>
+            <option value="10A">10A</option>
+            <option value="10B">10B</option>
+            <option value="11A">11A</option>
+            <option value="11B">11B</option>
+            <option value="12A">12A</option>
+            <option value="12B">12B</option>
+          </select>
+        </div>
+        
+        <div id="attendance-students-list">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="submit" class="btn" style="flex:1;">Save Attendance</button>
+          <button type="button" id="cancel-attendance-btn" class="btn btn-danger" style="flex:1;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden file input for CSV upload -->
+  <input type="file" id="csv-upload" accept=".csv" style="display:none">
+
+  
+  <!-- Load API-driven frontend (overrides localStorage demo handlers) -->
+  <script src="script.js"></script>
+</body>
+</html>
